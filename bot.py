@@ -46,8 +46,8 @@ class GeminiBot(commands.Bot):
         
         # Set bot status
         activity = discord.Activity(
-            type=discord.ActivityType.listening,
-            name="mentions for AI assistance"
+            type=discord.ActivityType.watching,
+            name="السيرفر | Server Guardian"
         )
         await self.change_presence(activity=activity)
     
@@ -76,7 +76,7 @@ class GeminiBot(commands.Bot):
                     content = content.replace(f'<@!{mention.id}>', '').strip()
                 
                 if not content:
-                    await message.reply("Hi! Please ask me a question and I'll help you with an AI-generated response!")
+                    await message.reply("أهلاً! أنا برعي، بواب السيرفر. اسأل سؤالك وسأساعدك بإجابة ذكية!\nHi! I'm Borai, the Server Gatekeeper. Ask me a question and I'll help you with an AI-generated response!")
                     return
                 
                 logger.info(f"Processing question from {message.author}: {content}")
@@ -112,13 +112,20 @@ class GeminiBot(commands.Bot):
             return None
         
         try:
-            # Create a helpful system prompt for Discord context
+            # Create a helpful system prompt with Arabic personality
             system_prompt = (
-                "You are a helpful AI assistant in a Discord server. "
+                "أنت مساعد ذكي اسمك 'برعي' ووظيفتك 'بواب السيرفر'. "
+                "عندما تُعرف بنفسك، قل أنك برعي بواب السيرفر. "
+                "أجب على الأسئلة بطريقة مفيدة وودودة. "
+                "يمكنك الرد بالعربية أو الإنجليزية حسب لغة السؤال. "
+                "اجعل إجاباتك واضحة ومناسبة لبيئة الدردشة في ديسكورد. "
+                "إذا لم تكن متأكداً من شيء، كن صادقاً بشأن ذلك.\n\n"
+                "You are an AI assistant named 'برعي' (Borai) and your job title is 'بواب السيرفر' (Server Gatekeeper). "
+                "When introducing yourself, say you are برعي بواب السيرفر. "
                 "Provide clear, concise, and helpful responses to user questions. "
+                "You can respond in Arabic or English based on the language of the question. "
                 "Keep responses conversational and friendly, suitable for a chat environment. "
-                "If you're unsure about something, be honest about it. "
-                "Avoid overly long responses unless specifically asked for detailed explanations."
+                "If you're unsure about something, be honest about it."
             )
             
             # Generate response using Gemini
@@ -158,26 +165,26 @@ bot = GeminiBot()
 async def help_command(ctx):
     """Display help information"""
     embed = discord.Embed(
-        title="🤖 AI Assistant Bot Help",
-        description="I'm an AI-powered bot that can answer your questions!",
+        title="🤖 برعي - بواب السيرفر",
+        description="أنا برعي، بواب السيرفر! مساعد ذكي يمكنه الإجابة على أسئلتكم\nI'm Borai, the Server Gatekeeper! An AI assistant that can answer your questions",
         color=0x00ff00
     )
     
     embed.add_field(
-        name="How to use:",
-        value="Simply mention me (@botname) followed by your question!",
+        name="كيفية الاستخدام / How to use:",
+        value="اذكرني (@برعي) متبوعاً بسؤالك!\nSimply mention me (@Borai) followed by your question!",
         inline=False
     )
     
     embed.add_field(
-        name="Example:",
-        value="@botname What is the capital of France?",
+        name="مثال / Example:",
+        value="@برعي ما هي عاصمة فرنسا؟\n@Borai What is the capital of France?",
         inline=False
     )
     
     embed.add_field(
-        name="Features:",
-        value="• AI-powered responses using Google Gemini\n• Natural conversation\n• Helpful and informative answers",
+        name="المميزات / Features:",
+        value="• إجابات ذكية باستخدام Google Gemini / AI-powered responses\n• محادثة طبيعية / Natural conversation\n• إجابات مفيدة ومعلوماتية / Helpful and informative answers\n• يدعم العربية والإنجليزية / Supports Arabic and English",
         inline=False
     )
     
