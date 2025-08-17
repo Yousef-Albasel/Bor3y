@@ -104,3 +104,8 @@ connector: <aiohttp.connector.TCPConnector object at 0x0000015BBD9CB4D0>
 2025-08-17 16:02:11,590 - __main__ - INFO - Bor3y#5114 has connected to Discord!
 2025-08-17 16:02:11,591 - __main__ - INFO - Bot is in 1 guilds
 2025-08-17 16:02:22,816 - __main__ - INFO - Bot stopped by user
+2025-08-17 17:25:15,037 - discord.client - INFO - logging in using static token
+2025-08-17 17:25:16,871 - discord.gateway - INFO - Shard ID None has connected to Gateway (Session ID: ebcaba49ebfa9b9125655530ecfee586).
+2025-08-17 17:25:18,876 - bor3y - INFO - Bor3y#5114 has connected to Discord!
+2025-08-17 17:25:18,876 - bor3y - INFO - Bot is in 1 guilds
+2025-08-17 17:25:21,105 - __main__ - INFO - Bot stopped by user

@@ -28,7 +28,7 @@ async def main():
     except Exception as e:
         logger.error(f"Failed to start bot: {e}")
 
-if __name__ == "bot.py":
+if __name__ == "__main__":
     try:
         asyncio.run(main())
     except KeyboardInterrupt:

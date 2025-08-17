@@ -2,7 +2,8 @@ import os
 import logging
 from langchain_google_genai import ChatGoogleGenerativeAI
 from langchain.prompts import PromptTemplate
-
+import dotenv
+dotenv.load_dotenv()
 logger = logging.getLogger(__name__)
 
 system_prompt = (
