@@ -1,0 +1,106 @@
+2025-08-17 12:16:47,148 - __main__ - ERROR - Failed to initialize Gemini client: Missing key inputs argument! To use the Google AI API, provide (`api_key`) arguments. To use the Google Cloud API, provide (`vertexai`, `project` & `location`) arguments.
+2025-08-17 12:16:47,148 - discord.client - WARNING - PyNaCl is not installed, voice will NOT be supported
+2025-08-17 12:16:47,149 - __main__ - ERROR - DISCORD_BOT_TOKEN environment variable not set
+2025-08-17 12:23:06,166 - __main__ - INFO - Gemini client initialized successfully
+2025-08-17 12:23:06,167 - discord.client - WARNING - PyNaCl is not installed, voice will NOT be supported
+2025-08-17 12:23:06,167 - discord.client - INFO - logging in using static token
+2025-08-17 12:23:06,745 - __main__ - ERROR - Failed to start bot: Shard ID None is requesting privileged intents that have not been explicitly enabled in the developer portal. It is recommended to go to https://discord.com/developers/applications/ and explicitly enable the privileged intents within your application's page. If this is not possible, then consider disabling the privileged intents instead.
+2025-08-17 12:23:06,804 - asyncio - ERROR - Unclosed connector
+connections: ['deque([(<aiohttp.client_proto.ResponseHandler object at 0x7f3b846c4ad0>, 11599.554441474)])']
+connector: <aiohttp.connector.TCPConnector object at 0x7f3b84898490>
+2025-08-17 12:23:10,411 - __main__ - INFO - Gemini client initialized successfully
+2025-08-17 12:23:10,412 - discord.client - WARNING - PyNaCl is not installed, voice will NOT be supported
+2025-08-17 12:23:10,413 - discord.client - INFO - logging in using static token
+2025-08-17 12:23:11,085 - __main__ - ERROR - Failed to start bot: Shard ID None is requesting privileged intents that have not been explicitly enabled in the developer portal. It is recommended to go to https://discord.com/developers/applications/ and explicitly enable the privileged intents within your application's page. If this is not possible, then consider disabling the privileged intents instead.
+2025-08-17 12:23:11,135 - asyncio - ERROR - Unclosed connector
+connections: ['deque([(<aiohttp.client_proto.ResponseHandler object at 0x7f390f23f7e0>, 11603.925150535)])']
+connector: <aiohttp.connector.TCPConnector object at 0x7f390f2deb10>
+2025-08-17 12:24:23,657 - __main__ - INFO - Gemini client initialized successfully
+2025-08-17 12:24:23,658 - discord.client - WARNING - PyNaCl is not installed, voice will NOT be supported
+2025-08-17 12:24:23,658 - discord.client - INFO - logging in using static token
+2025-08-17 12:24:24,230 - discord.gateway - INFO - Shard ID None has connected to Gateway (Session ID: 578bc436021255e8c130895284eef3c6).
+2025-08-17 12:24:26,233 - __main__ - INFO - Bor3y#5114 has connected to Discord!
+2025-08-17 12:24:26,233 - __main__ - INFO - Bot is in 1 guilds
+2025-08-17 12:24:37,328 - __main__ - INFO - Processing question from albasel: انت صاحي ؟
+2025-08-17 12:24:37,328 - google_genai.models - INFO - AFC is enabled with max remote calls: 10.
+2025-08-17 12:24:38,283 - httpx - INFO - HTTP Request: POST https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent "HTTP/1.1 200 OK"
+2025-08-17 12:24:38,286 - google_genai.models - INFO - AFC remote call 1 is done.
+2025-08-17 12:24:38,286 - __main__ - INFO - Successfully generated Gemini response
+2025-08-17 12:26:50,913 - __main__ - INFO - Gemini client initialized successfully
+2025-08-17 12:26:50,913 - discord.client - WARNING - PyNaCl is not installed, voice will NOT be supported
+2025-08-17 12:26:50,914 - discord.client - INFO - logging in using static token
+2025-08-17 12:26:51,480 - discord.gateway - INFO - Shard ID None has connected to Gateway (Session ID: a6df8bfec3245b53a16d006df02a1fbc).
+2025-08-17 12:26:53,483 - __main__ - INFO - Bor3y#5114 has connected to Discord!
+2025-08-17 12:26:53,483 - __main__ - INFO - Bot is in 1 guilds
+2025-08-17 12:27:02,696 - __main__ - INFO - Processing question from albasel: عرف نفسك
+2025-08-17 12:27:02,696 - google_genai.models - INFO - AFC is enabled with max remote calls: 10.
+2025-08-17 12:27:03,736 - httpx - INFO - HTTP Request: POST https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent "HTTP/1.1 200 OK"
+2025-08-17 12:27:03,737 - google_genai.models - INFO - AFC remote call 1 is done.
+2025-08-17 12:27:03,738 - __main__ - INFO - Successfully generated Gemini response
+2025-08-17 12:27:09,356 - __main__ - INFO - Processing question from albasel: اسمك ايه
+2025-08-17 12:27:09,356 - google_genai.models - INFO - AFC is enabled with max remote calls: 10.
+2025-08-17 12:27:10,136 - httpx - INFO - HTTP Request: POST https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent "HTTP/1.1 200 OK"
+2025-08-17 12:27:10,137 - google_genai.models - INFO - AFC remote call 1 is done.
+2025-08-17 12:27:10,137 - __main__ - INFO - Successfully generated Gemini response
+2025-08-17 12:27:25,406 - __main__ - INFO - Processing question from albasel: ايه هي ال CUA
+2025-08-17 12:27:25,406 - google_genai.models - INFO - AFC is enabled with max remote calls: 10.
+2025-08-17 12:27:28,948 - httpx - INFO - HTTP Request: POST https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent "HTTP/1.1 200 OK"
+2025-08-17 12:27:28,949 - google_genai.models - INFO - AFC remote call 1 is done.
+2025-08-17 12:27:28,950 - __main__ - INFO - Successfully generated Gemini response
+2025-08-17 12:27:36,817 - __main__ - INFO - Processing question from albasel: لا اقصد ال Computer Use Agent
+2025-08-17 12:27:36,818 - google_genai.models - INFO - AFC is enabled with max remote calls: 10.
+2025-08-17 12:27:39,262 - httpx - INFO - HTTP Request: POST https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent "HTTP/1.1 200 OK"
+2025-08-17 12:27:39,263 - google_genai.models - INFO - AFC remote call 1 is done.
+2025-08-17 12:27:39,264 - __main__ - INFO - Successfully generated Gemini response
+2025-08-17 12:28:26,503 - __main__ - INFO - Processing question from albasel: Search Computer Using Agents and tell me what is this about
+2025-08-17 12:28:26,503 - google_genai.models - INFO - AFC is enabled with max remote calls: 10.
+2025-08-17 12:28:31,454 - httpx - INFO - HTTP Request: POST https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent "HTTP/1.1 200 OK"
+2025-08-17 12:28:31,455 - google_genai.models - INFO - AFC remote call 1 is done.
+2025-08-17 12:28:31,455 - __main__ - INFO - Successfully generated Gemini response
+2025-08-17 12:29:38,632 - __main__ - INFO - Gemini client initialized successfully
+2025-08-17 12:29:38,632 - discord.client - WARNING - PyNaCl is not installed, voice will NOT be supported
+2025-08-17 12:29:38,633 - discord.client - INFO - logging in using static token
+2025-08-17 12:29:39,372 - discord.gateway - INFO - Shard ID None has connected to Gateway (Session ID: c1aecbe6f67a6e3fac6a4bd67eb48e2e).
+2025-08-17 12:29:41,392 - __main__ - INFO - Bor3y#5114 has connected to Discord!
+2025-08-17 12:29:41,392 - __main__ - INFO - Bot is in 1 guilds
+2025-08-17 12:29:46,970 - __main__ - INFO - Processing question from albasel: explain quantum physics
+2025-08-17 12:29:46,971 - google_genai.models - INFO - AFC is enabled with max remote calls: 10.
+2025-08-17 12:29:53,391 - httpx - INFO - HTTP Request: POST https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent "HTTP/1.1 200 OK"
+2025-08-17 12:29:53,393 - google_genai.models - INFO - AFC remote call 1 is done.
+2025-08-17 12:29:53,393 - __main__ - INFO - Successfully generated Gemini response
+2025-08-17 12:30:58,152 - __main__ - INFO - Processing question from albasel: help
+2025-08-17 12:30:58,153 - google_genai.models - INFO - AFC is enabled with max remote calls: 10.
+2025-08-17 12:30:58,863 - httpx - INFO - HTTP Request: POST https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent "HTTP/1.1 200 OK"
+2025-08-17 12:30:58,864 - google_genai.models - INFO - AFC remote call 1 is done.
+2025-08-17 12:30:58,865 - __main__ - INFO - Successfully generated Gemini response
+2025-08-17 12:31:42,300 - __main__ - INFO - Processing question from eslamsayed: can you remind me to book our next offline meeting tomorrow at 10 AM
+2025-08-17 12:31:42,300 - google_genai.models - INFO - AFC is enabled with max remote calls: 10.
+2025-08-17 12:31:43,266 - httpx - INFO - HTTP Request: POST https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent "HTTP/1.1 200 OK"
+2025-08-17 12:31:43,271 - google_genai.models - INFO - AFC remote call 1 is done.
+2025-08-17 12:31:43,278 - __main__ - INFO - Successfully generated Gemini response
+2025-08-17 12:37:12,778 - __main__ - INFO - Gemini client initialized successfully
+2025-08-17 12:37:12,779 - discord.client - WARNING - PyNaCl is not installed, voice will NOT be supported
+2025-08-17 12:37:12,779 - discord.client - INFO - logging in using static token
+2025-08-17 12:37:13,406 - discord.gateway - INFO - Shard ID None has connected to Gateway (Session ID: 497c7df731c35a495956e5fd8ad7cefc).
+2025-08-17 12:37:15,413 - __main__ - INFO - Bor3y#5114 has connected to Discord!
+2025-08-17 12:37:15,413 - __main__ - INFO - Bot is in 1 guilds
+2025-08-17 15:58:26,556 - __main__ - ERROR - Failed to initialize Gemini client: Missing key inputs argument! To use the Google AI API, provide (`api_key`) arguments. To use the Google Cloud API, provide (`vertexai`, `project` & `location`) arguments.
+2025-08-17 15:58:26,557 - discord.client - WARNING - PyNaCl is not installed, voice will NOT be supported
+2025-08-17 15:58:26,559 - __main__ - ERROR - DISCORD_BOT_TOKEN environment variable not set
+2025-08-17 15:59:05,615 - __main__ - ERROR - Failed to initialize Gemini client: Missing key inputs argument! To use the Google AI API, provide (`api_key`) arguments. To use the Google Cloud API, provide (`vertexai`, `project` & `location`) arguments.
+2025-08-17 15:59:05,616 - discord.client - WARNING - PyNaCl is not installed, voice will NOT be supported
+2025-08-17 15:59:05,618 - __main__ - ERROR - DISCORD_BOT_TOKEN environment variable not set
+2025-08-17 16:01:47,044 - __main__ - INFO - Gemini client initialized successfully
+2025-08-17 16:01:47,045 - discord.client - WARNING - PyNaCl is not installed, voice will NOT be supported
+2025-08-17 16:01:47,046 - discord.client - INFO - logging in using static token
+2025-08-17 16:01:47,535 - __main__ - ERROR - Invalid Discord bot token
+2025-08-17 16:01:47,617 - asyncio - ERROR - Unclosed connector
+connections: ['deque([(<aiohttp.client_proto.ResponseHandler object at 0x0000015BBD99E9F0>, 67507.7586752)])']
+connector: <aiohttp.connector.TCPConnector object at 0x0000015BBD9CB4D0>
+2025-08-17 16:02:08,025 - __main__ - INFO - Gemini client initialized successfully
+2025-08-17 16:02:08,025 - discord.client - WARNING - PyNaCl is not installed, voice will NOT be supported
+2025-08-17 16:02:08,027 - discord.client - INFO - logging in using static token
+2025-08-17 16:02:09,584 - discord.gateway - INFO - Shard ID None has connected to Gateway (Session ID: 92eabef0a7983c083108bf50a0ccb039).
+2025-08-17 16:02:11,590 - __main__ - INFO - Bor3y#5114 has connected to Discord!
+2025-08-17 16:02:11,591 - __main__ - INFO - Bot is in 1 guilds
+2025-08-17 16:02:22,816 - __main__ - INFO - Bot stopped by user

@@ -1,0 +1,5 @@
+discord.py
+google
+discord
+google-genai
+python-dotenv

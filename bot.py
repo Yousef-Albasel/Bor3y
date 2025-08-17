@@ -5,7 +5,8 @@ import discord
 from discord.ext import commands
 from google import genai
 from google.genai import types
-
+import dotenv
+dotenv.load_dotenv()
 # Set up logging
 logging.basicConfig(
     level=logging.INFO,
