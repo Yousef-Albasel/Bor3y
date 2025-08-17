@@ -43,7 +43,7 @@ class Bor3yBot(commands.Bot):
                     content = content.replace(f'<@{mention.id}>', '').strip()
                     content = content.replace(f'<@!{mention.id}>', '').strip()
                 if not content:
-                    await message.reply("أهلاً! أنا برعي، بواب السيرفر. اسأل سؤالك وسأساعدك بإجابة ذكية!\nHi! I'm Borai, the Server Gatekeeper. Ask me a question and I'll help you with an AI-generated response!")
+                    await message.reply("أهلاً! أنا برعي، بواب السيرفر. اسأل سؤالك وسأساعدك بإجابة ذكية!\nHi! I'm Bor3y, the Server Gatekeeper. Ask me a question and I'll help you with an AI-generated response!")
                     return
                 logger.info(f"Processing question from {message.author}: {content}")
                 ai_response = await self.get_gemini_response(content)
