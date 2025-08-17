@@ -3,3 +3,6 @@ google
 discord
 google-genai
 python-dotenv
+langchain
+langchain_community
+langchain_google_genai
