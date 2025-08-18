@@ -5,6 +5,7 @@ from discord.ext import commands
 from ai_client import *
 from discord import app_commands
 from datetime import datetime
+from reminder_db import init_db, add_reminder, get_due_reminders, delete_reminder
 
 logger = logging.getLogger(__name__)
 gemini_llm = get_gemini_llm()
@@ -20,6 +21,7 @@ class Bor3yBot(commands.Bot):
             intents=intents,
             help_command=None
         )
+        self.bg_task = None
 
     async def on_ready(self):
         logger.info(f'{self.user} has connected to Discord!')
@@ -30,7 +32,25 @@ class Bor3yBot(commands.Bot):
         )
         await self.change_presence(activity=activity)
     async def setup_hook(self):
+            await init_db()
             await self.tree.sync()  # Sync slash commands on startup
+            self.bg_task = asyncio.create_task(self.reminder_loop())
+
+    async def reminder_loop(self):
+        await self.wait_until_ready()
+        while not self.is_closed():
+            now = datetime.utcnow().strftime("%Y-%m-%d %H:%M")
+            due = await get_due_reminders(now)
+            for reminder in due:
+                _id, user_id, channel_id, message, when_utc = reminder
+                channel = self.get_channel(channel_id)
+                if channel:
+                    try:
+                        await channel.send(f"⏰ <@{user_id}> Reminder: {message} (scheduled for {when_utc} UTC)")
+                    except Exception as e:
+                        logger.error(f"Failed to send reminder: {e}")
+                await delete_reminder(_id)
+            await asyncio.sleep(60)
 
     async def on_message(self, message):
         if message.author == self.user:
@@ -171,23 +191,18 @@ async def search_command(interaction: discord.Interaction, query: str):
     time="When to send it (YYYY-MM-DD HH:MM, 24h UTC)"
 )
 async def schedule_command(interaction: discord.Interaction, message: str, time: str):
-    """Schedule a message to be sent at a specific time (UTC)."""
     try:
         await interaction.response.defer(thinking=True)
-        # Parse the time string
         try:
             when = datetime.strptime(time, "%Y-%m-%d %H:%M")
         except ValueError:
             await interaction.followup.send("Invalid time format. Use YYYY-MM-DD HH:MM (24h UTC).")
             return
-        # Schedule the message
-        asyncio.create_task(
-            schedule_message(
-                bot,
-                interaction.channel_id,
-                f"⏰ Scheduled by {interaction.user.mention}: {message}",
-                when
-            )
+        await add_reminder(
+            user_id=interaction.user.id,
+            channel_id=interaction.channel_id,
+            message=message,
+            when_utc=when.strftime("%Y-%m-%d %H:%M")
         )
         await interaction.followup.send(f"Message scheduled for {when.strftime('%Y-%m-%d %H:%M')} UTC!")
     except Exception as e:
