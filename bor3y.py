@@ -1,4 +1,5 @@
 import logging
+import aiosqlite
 import discord
 import asyncio
 from discord.ext import commands
@@ -6,7 +7,7 @@ from ai_client import *
 from discord import app_commands
 from datetime import datetime
 from reminder_db import init_db, add_reminder, get_due_reminders, delete_reminder
-
+from zoneinfo import ZoneInfo
 logger = logging.getLogger(__name__)
 gemini_llm = get_gemini_llm()
 
@@ -46,7 +47,7 @@ class Bor3yBot(commands.Bot):
                 channel = self.get_channel(channel_id)
                 if channel:
                     try:
-                        await channel.send(f"⏰ <@{user_id}> Reminder: {message} (scheduled for {when_utc} UTC)")
+                        await channel.send(f"⏰ <@everyone> Reminder: {message} (scheduled for {when_utc} UTC)")
                     except Exception as e:
                         logger.error(f"Failed to send reminder: {e}")
                 await delete_reminder(_id)
@@ -185,26 +186,69 @@ async def search_command(interaction: discord.Interaction, query: str):
         logger.error(f"Error in search command: {e}")
         await interaction.followup.send("Sorry, I couldn't perform the search. Please try again later.")
 
-@bot.tree.command(name="schedule", description="Schedule a message to be sent later")
+@bot.tree.command(name="schedule", description="Schedule a message to be sent later (Cairo Time)")
 @app_commands.describe(
     message="The message to send",
-    time="When to send it (YYYY-MM-DD HH:MM, 24h UTC)"
+    time="When to send it (YYYY-MM-DD HH:MM, 24h Cairo time)"
 )
 async def schedule_command(interaction: discord.Interaction, message: str, time: str):
     try:
         await interaction.response.defer(thinking=True)
         try:
-            when = datetime.strptime(time, "%Y-%m-%d %H:%M")
-        except ValueError:
-            await interaction.followup.send("Invalid time format. Use YYYY-MM-DD HH:MM (24h UTC).")
+            # Parse as Cairo time
+            cairo = ZoneInfo("Africa/Cairo")
+            when_cairo = datetime.strptime(time, "%Y-%m-%d %H:%M").replace(tzinfo=cairo)
+            when_utc = when_cairo.astimezone(ZoneInfo("UTC"))
+        except Exception:
+            await interaction.followup.send("Invalid time format. Use YYYY-MM-DD HH:MM (24h Cairo time).")
             return
         await add_reminder(
             user_id=interaction.user.id,
             channel_id=interaction.channel_id,
             message=message,
-            when_utc=when.strftime("%Y-%m-%d %H:%M")
+            when_utc=when_utc.strftime("%Y-%m-%d %H:%M")
         )
-        await interaction.followup.send(f"Message scheduled for {when.strftime('%Y-%m-%d %H:%M')} UTC!")
+        await interaction.followup.send(
+            f"Message scheduled for {when_cairo.strftime('%Y-%m-%d %H:%M')} Cairo time "
+            f"({when_utc.strftime('%Y-%m-%d %H:%M')} UTC)!"
+        )
     except Exception as e:
         logger.error(f"Error in schedule command: {e}")
         await interaction.followup.send("Sorry, I couldn't schedule your message.")
+
+@bot.tree.command(name="scheduled", description="Show all your scheduled messages (Cairo Time)")
+async def scheduled_command(interaction: discord.Interaction):
+    try:
+        await interaction.response.defer(thinking=True)
+        # Fetch all reminders for this user in this channel
+        async with aiosqlite.connect("reminders.db") as db:
+            cursor = await db.execute(
+                "SELECT message, when_utc FROM reminders WHERE user_id = ? AND channel_id = ? ORDER BY when_utc",
+                (interaction.user.id, interaction.channel_id)
+            )
+            rows = await cursor.fetchall()
+        if not rows:
+            await interaction.followup.send("You have no scheduled messages in this channel.")
+            return
+
+        cairo = ZoneInfo("Africa/Cairo")
+        lines = []
+        for msg, when_utc in rows:
+            when_utc_dt = datetime.strptime(when_utc, "%Y-%m-%d %H:%M").replace(tzinfo=ZoneInfo("UTC"))
+            when_cairo = when_utc_dt.astimezone(cairo).strftime("%Y-%m-%d %H:%M")
+            lines.append(f"**{when_cairo} Cairo:** {msg}")
+
+        # Discord message limit: 2000 chars
+        output = "\n".join(lines)
+        if len(output) > 2000:
+            # Send as file if too long
+            with open("scheduled.txt", "w", encoding="utf-8") as f:
+                f.write(output)
+            file = discord.File("scheduled.txt")
+            await interaction.followup.send("Your scheduled messages:", file=file)
+        else:
+            await interaction.followup.send(f"Your scheduled messages:\n{output}")
+
+    except Exception as e:
+        logger.error(f"Error in scheduled command: {e}")
+        await interaction.followup.send("Sorry, I couldn't retrieve your scheduled messages.")
