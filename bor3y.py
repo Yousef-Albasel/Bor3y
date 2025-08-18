@@ -4,6 +4,7 @@ import asyncio
 from discord.ext import commands
 from ai_client import *
 from discord import app_commands
+from datetime import datetime
 
 logger = logging.getLogger(__name__)
 gemini_llm = get_gemini_llm()
@@ -163,3 +164,32 @@ async def search_command(interaction: discord.Interaction, query: str):
     except Exception as e:
         logger.error(f"Error in search command: {e}")
         await interaction.followup.send("Sorry, I couldn't perform the search. Please try again later.")
+
+@bot.tree.command(name="schedule", description="Schedule a message to be sent later")
+@app_commands.describe(
+    message="The message to send",
+    time="When to send it (YYYY-MM-DD HH:MM, 24h UTC)"
+)
+async def schedule_command(interaction: discord.Interaction, message: str, time: str):
+    """Schedule a message to be sent at a specific time (UTC)."""
+    try:
+        await interaction.response.defer(thinking=True)
+        # Parse the time string
+        try:
+            when = datetime.strptime(time, "%Y-%m-%d %H:%M")
+        except ValueError:
+            await interaction.followup.send("Invalid time format. Use YYYY-MM-DD HH:MM (24h UTC).")
+            return
+        # Schedule the message
+        asyncio.create_task(
+            schedule_message(
+                bot,
+                interaction.channel_id,
+                f"⏰ Scheduled by {interaction.user.mention}: {message}",
+                when
+            )
+        )
+        await interaction.followup.send(f"Message scheduled for {when.strftime('%Y-%m-%d %H:%M')} UTC!")
+    except Exception as e:
+        logger.error(f"Error in schedule command: {e}")
+        await interaction.followup.send("Sorry, I couldn't schedule your message.")

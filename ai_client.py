@@ -1,5 +1,7 @@
 import os
 import logging
+import asyncio
+from datetime import datetime, timedelta
 from langchain_google_genai import ChatGoogleGenerativeAI
 from langchain.prompts import PromptTemplate
 from langchain_community.retrievers import TavilySearchAPIRetriever
@@ -50,3 +52,15 @@ def get_search_chain():
         retriever=retriever,
         return_source_documents=True
     )
+
+scheduled_tasks = []
+
+async def schedule_message(bot, channel_id, message, when: datetime):
+    now = datetime.utcnow()
+    delay = (when - now).total_seconds()
+    if delay < 0:
+        delay = 0
+    await asyncio.sleep(delay)
+    channel = bot.get_channel(channel_id)
+    if channel:
+        await channel.send(message)

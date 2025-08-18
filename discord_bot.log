@@ -177,3 +177,8 @@ In embeds.0.fields.0.value: Must be 1024 or fewer in length.
 2025-08-18 16:49:18,004 - discord.ext.commands.bot - ERROR - Ignoring exception in command None
 discord.ext.commands.errors.CommandNotFound: Command "search" is not found
 2025-08-18 16:49:27,241 - __main__ - INFO - Bot stopped by user
+2025-08-18 17:19:51,602 - discord.client - INFO - logging in using static token
+2025-08-18 17:19:55,395 - discord.gateway - INFO - Shard ID None has connected to Gateway (Session ID: c72573e1618948c0565f919a435f5dfc).
+2025-08-18 17:19:57,402 - bor3y - INFO - Bor3y#5114 has connected to Discord!
+2025-08-18 17:19:57,402 - bor3y - INFO - Bot is in 2 guilds
+2025-08-18 17:20:02,777 - __main__ - INFO - Bot stopped by user
