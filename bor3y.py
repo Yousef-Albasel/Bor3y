@@ -3,6 +3,7 @@ import discord
 import asyncio
 from discord.ext import commands
 from ai_client import *
+from discord import app_commands
 
 logger = logging.getLogger(__name__)
 gemini_llm = get_gemini_llm()
@@ -27,6 +28,8 @@ class Bor3yBot(commands.Bot):
             name="السيرفر | Server Guardian"
         )
         await self.change_presence(activity=activity)
+    async def setup_hook(self):
+            await self.tree.sync()  # Sync slash commands on startup
 
     async def on_message(self, message):
         if message.author == self.user:
@@ -127,28 +130,36 @@ async def status_command(ctx):
     embed.add_field(name="Latency", value=f"{round(bot.latency * 1000)}ms", inline=True)
     await ctx.send(embed=embed)
 
-
-@bot.command(name='search')
-async def status_command(ctx,query):
-    await ctx.trigger_typing()
+@bot.tree.command(name="search", description="Search the web and answer using Gemini")
+@app_commands.describe(query="Your search query")
+async def search_command(interaction: discord.Interaction, query: str):
     try:
+        await interaction.response.defer(thinking=True)
         qa_chain = get_search_chain()
         loop = asyncio.get_event_loop()
-        response = await loop.run_in_executor(None,lambda:qa_chain(query))
+        response = await loop.run_in_executor(None, lambda: qa_chain.invoke(query))
         answer = response['result']
         sources = response.get('source_documents', [])
-        sources_text = "\n".join([f"[{doc.metadata['title']}]({doc.metadata['url']})" for doc in sources])
+        sources_text = "\n".join([f"[{doc.metadata.get('title','Source')}]({doc.metadata.get('source','')})" for doc in sources])
+        truncated_sources = sources_text
+        if len(truncated_sources) > 1024:
+            truncated_sources = truncated_sources[:1020] + "..."
+
         embed = discord.Embed(
             title="Search Results",
             description=answer,
             color=0x0099ff
         )
-        if sources_text:
-            embed.add_field(name="Sources", value=sources_text, inline=False)
+        if truncated_sources:
+            embed.add_field(name="Sources", value=truncated_sources, inline=False)
         else:
             embed.add_field(name="Sources", value="No sources found.", inline=False)
-        await ctx.send(embed=embed)
+        await interaction.followup.send(embed=embed)
+
+        if len(sources_text) > 1024:
+            chunks = [sources_text[i:i+2000] for i in range(0, len(sources_text), 2000)]
+            for chunk in chunks:
+                await interaction.followup.send(chunk)
     except Exception as e:
         logger.error(f"Error in search command: {e}")
-        await ctx.send("Sorry, I couldn't perform the search. Please try again later.")
-        
+        await interaction.followup.send("Sorry, I couldn't perform the search. Please try again later.")

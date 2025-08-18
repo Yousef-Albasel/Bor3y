@@ -109,3 +109,71 @@ connector: <aiohttp.connector.TCPConnector object at 0x0000015BBD9CB4D0>
 2025-08-17 17:25:18,876 - bor3y - INFO - Bor3y#5114 has connected to Discord!
 2025-08-17 17:25:18,876 - bor3y - INFO - Bot is in 1 guilds
 2025-08-17 17:25:21,105 - __main__ - INFO - Bot stopped by user
+2025-08-18 16:36:57,796 - discord.client - INFO - logging in using static token
+2025-08-18 16:36:59,386 - discord.gateway - INFO - Shard ID None has connected to Gateway (Session ID: 96bc94ddbe23a9f3b0f8a1af767802c6).
+2025-08-18 16:37:01,400 - bor3y - INFO - Bor3y#5114 has connected to Discord!
+2025-08-18 16:37:01,401 - bor3y - INFO - Bot is in 2 guilds
+2025-08-18 16:37:04,033 - discord.ext.commands.bot - ERROR - Ignoring exception in command search
+Traceback (most recent call last):
+  File "C:\Users\ASUS\AppData\Local\Programs\Python\Python313\Lib\site-packages\discord\ext\commands\core.py", line 235, in wrapped
+    ret = await coro(*args, **kwargs)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "f:\Bor3y\bor3y.py", line 133, in status_command
+    await ctx.trigger_typing()
+          ^^^^^^^^^^^^^^^^^^
+AttributeError: 'Context' object has no attribute 'trigger_typing'
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "C:\Users\ASUS\AppData\Local\Programs\Python\Python313\Lib\site-packages\discord\ext\commands\bot.py", line 1366, in invoke
+    await ctx.command.invoke(ctx)
+  File "C:\Users\ASUS\AppData\Local\Programs\Python\Python313\Lib\site-packages\discord\ext\commands\core.py", line 1029, in invoke
+    await injected(*ctx.args, **ctx.kwargs)  # type: ignore
+    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\ASUS\AppData\Local\Programs\Python\Python313\Lib\site-packages\discord\ext\commands\core.py", line 244, in wrapped
+    raise CommandInvokeError(exc) from exc
+discord.ext.commands.errors.CommandInvokeError: Command raised an exception: AttributeError: 'Context' object has no attribute 'trigger_typing'
+2025-08-18 16:37:35,640 - __main__ - INFO - Bot stopped by user
+2025-08-18 16:37:45,182 - discord.client - INFO - logging in using static token
+2025-08-18 16:37:47,677 - discord.gateway - INFO - Shard ID None has connected to Gateway (Session ID: 1538c1aee93261892ca69aad8c04e9d6).
+2025-08-18 16:37:49,683 - bor3y - INFO - Bor3y#5114 has connected to Discord!
+2025-08-18 16:37:49,683 - bor3y - INFO - Bot is in 2 guilds
+2025-08-18 16:37:56,729 - ai_client - INFO - Gemini LLM initialized successfully
+2025-08-18 16:37:56,739 - bor3y - ERROR - Error in search command: Tavily python package not found. Please install it with `pip install tavily-python`.
+2025-08-18 16:38:48,466 - __main__ - INFO - Bot stopped by user
+2025-08-18 16:39:17,256 - discord.client - INFO - logging in using static token
+2025-08-18 16:39:20,106 - discord.gateway - INFO - Shard ID None has connected to Gateway (Session ID: 2fe74000122b2b5e5c02038ee545806f).
+2025-08-18 16:39:22,186 - bor3y - INFO - Bor3y#5114 has connected to Discord!
+2025-08-18 16:39:22,186 - bor3y - INFO - Bot is in 2 guilds
+2025-08-18 16:39:32,073 - ai_client - INFO - Gemini LLM initialized successfully
+2025-08-18 16:39:36,261 - bor3y - ERROR - Error in search command: 'url'
+2025-08-18 16:40:22,605 - __main__ - INFO - Bot stopped by user
+2025-08-18 16:40:26,945 - discord.client - INFO - logging in using static token
+2025-08-18 16:40:29,631 - discord.gateway - INFO - Shard ID None has connected to Gateway (Session ID: 2e6d0776920ff8025ea8c87ae7616def).
+2025-08-18 16:40:31,658 - bor3y - INFO - Bor3y#5114 has connected to Discord!
+2025-08-18 16:40:31,658 - bor3y - INFO - Bot is in 2 guilds
+2025-08-18 16:40:34,504 - ai_client - INFO - Gemini LLM initialized successfully
+2025-08-18 16:40:55,507 - ai_client - INFO - Gemini LLM initialized successfully
+2025-08-18 16:41:00,011 - bor3y - ERROR - Error in search command: 400 Bad Request (error code: 50035): Invalid Form Body
+In embeds.0.fields.0.value: Must be 1024 or fewer in length.
+2025-08-18 16:42:05,087 - __main__ - INFO - Bot stopped by user
+2025-08-18 16:45:46,148 - discord.client - INFO - logging in using static token
+2025-08-18 16:45:48,280 - discord.gateway - INFO - Shard ID None has connected to Gateway (Session ID: de2ad9410c2328b89d162ba298e836c7).
+2025-08-18 16:45:50,290 - bor3y - INFO - Bor3y#5114 has connected to Discord!
+2025-08-18 16:45:50,291 - bor3y - INFO - Bot is in 2 guilds
+2025-08-18 16:45:55,691 - bor3y - ERROR - Error in search command: 'Context' object has no attribute 'trigger_typing'
+2025-08-18 16:46:03,474 - bor3y - ERROR - Error in search command: 'Context' object has no attribute 'trigger_typing'
+2025-08-18 16:46:30,813 - __main__ - INFO - Bot stopped by user
+2025-08-18 16:46:51,995 - discord.client - INFO - logging in using static token
+2025-08-18 16:46:54,062 - discord.gateway - INFO - Shard ID None has connected to Gateway (Session ID: 181efdbd82b8ab758cdd6fc20c8f4386).
+2025-08-18 16:46:56,072 - bor3y - INFO - Bor3y#5114 has connected to Discord!
+2025-08-18 16:46:56,072 - bor3y - INFO - Bot is in 2 guilds
+2025-08-18 16:47:05,966 - __main__ - INFO - Bot stopped by user
+2025-08-18 16:49:05,740 - discord.client - INFO - logging in using static token
+2025-08-18 16:49:08,242 - discord.gateway - INFO - Shard ID None has connected to Gateway (Session ID: 4c0d0388db568799fc3d4282c41a2aaf).
+2025-08-18 16:49:10,270 - bor3y - INFO - Bor3y#5114 has connected to Discord!
+2025-08-18 16:49:10,271 - bor3y - INFO - Bot is in 2 guilds
+2025-08-18 16:49:18,004 - discord.ext.commands.bot - ERROR - Ignoring exception in command None
+discord.ext.commands.errors.CommandNotFound: Command "search" is not found
+2025-08-18 16:49:27,241 - __main__ - INFO - Bot stopped by user
