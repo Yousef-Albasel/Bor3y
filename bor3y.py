@@ -2,7 +2,7 @@ import logging
 import discord
 import asyncio
 from discord.ext import commands
-from ai_client import get_gemini_llm, build_prompt
+from ai_client import *
 
 logger = logging.getLogger(__name__)
 gemini_llm = get_gemini_llm()
@@ -126,3 +126,29 @@ async def status_command(ctx):
     embed.add_field(name="Gemini AI", value=gemini_status, inline=True)
     embed.add_field(name="Latency", value=f"{round(bot.latency * 1000)}ms", inline=True)
     await ctx.send(embed=embed)
+
+
+@bot.command(name='search')
+async def status_command(ctx,query):
+    await ctx.trigger_typing()
+    try:
+        qa_chain = get_search_chain()
+        loop = asyncio.get_event_loop()
+        response = await loop.run_in_executor(None,lambda:qa_chain(query))
+        answer = response['result']
+        sources = response.get('source_documents', [])
+        sources_text = "\n".join([f"[{doc.metadata['title']}]({doc.metadata['url']})" for doc in sources])
+        embed = discord.Embed(
+            title="Search Results",
+            description=answer,
+            color=0x0099ff
+        )
+        if sources_text:
+            embed.add_field(name="Sources", value=sources_text, inline=False)
+        else:
+            embed.add_field(name="Sources", value="No sources found.", inline=False)
+        await ctx.send(embed=embed)
+    except Exception as e:
+        logger.error(f"Error in search command: {e}")
+        await ctx.send("Sorry, I couldn't perform the search. Please try again later.")
+        
