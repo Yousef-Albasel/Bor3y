@@ -343,3 +343,31 @@ async def tasks_command(interaction: discord.Interaction):
     except Exception as e:
         logger.error(f"Error in tasks command: {e}")
         await interaction.followup.send("Sorry, I couldn't retrieve the tasks.")
+
+@bot.tree.command(name="assign_all", description="Assign a task to all users in the server")
+@app_commands.describe(
+    task="The task description"
+)
+async def assign_all_command(interaction: discord.Interaction, task: str):
+    try:
+        await interaction.response.defer(thinking=True)
+        # Get all members (excluding bots)
+        members = [m for m in interaction.guild.members if not m.bot]
+        if not members:
+            await interaction.followup.send("No users found to assign the task.")
+            return
+
+        # Assign the task to each member
+        for member in members:
+            await add_task(
+                assigner_id=interaction.user.id,
+                assignee_id=member.id,
+                channel_id=interaction.channel_id,
+                task=task
+            )
+        await interaction.followup.send(
+            f"✅ Task assigned to **{len(members)}** users: {task}"
+        )
+    except Exception as e:
+        logger.error(f"Error in assign_all command: {e}")
+        await interaction.followup.send("Sorry, I couldn't assign the task to all users.")
