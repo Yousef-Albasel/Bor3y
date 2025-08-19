@@ -299,15 +299,21 @@ async def tasks_command(interaction: discord.Interaction):
 
         embeds = []
         for assignee_id, task_list in user_tasks.items():
+            # Try to get the member from cache, else fetch from API
             user = interaction.guild.get_member(assignee_id)
+            if user is None:
+                try:
+                    user = await interaction.guild.fetch_member(assignee_id)
+                except Exception:
+                    user = None
+
             if user:
                 name = user.display_name
                 icon_url = user.display_avatar.url
             else:
-                name = f"User <@{assignee_id}>"
+                name = f"User {assignee_id}"
                 icon_url = None
 
-            # Build tasks text, truncate if needed
             value = ""
             for task_id, assigner_id, channel_id, task_desc in task_list:
                 line = f"**#{task_id}**: {task_desc} _(by <@{assigner_id}> in <#{channel_id}>)_\n"
@@ -321,16 +327,13 @@ async def tasks_command(interaction: discord.Interaction):
                 description=value or "No tasks.",
                 color=0x3498db
             )
-
             if icon_url:
                 embed.set_author(name=name, icon_url=icon_url)
             else:
                 embed.set_author(name=name)
-
             embed.set_footer(text="Task IDs shown for easy reference.")
             embeds.append(embed)
 
-        # Discord allows max 10 embeds per message, so send in batches
         for i in range(0, len(embeds), 10):
             await interaction.followup.send(embeds=embeds[i:i+10])
 
