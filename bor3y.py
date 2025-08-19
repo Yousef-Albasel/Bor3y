@@ -292,17 +292,52 @@ async def tasks_command(interaction: discord.Interaction):
         if not tasks:
             await interaction.followup.send("No tasks assigned yet.")
             return
+
+        # Group tasks by assignee_id
+        from collections import defaultdict
+        user_tasks = defaultdict(list)
+        for task in tasks:
+            task_id, assigner_id, assignee_id, channel_id, task_desc = task
+            user_tasks[assignee_id].append((task_id, assigner_id, channel_id, task_desc))
+
         embed = discord.Embed(
             title="📋 Assigned Tasks",
             color=0x3498db
         )
-        for task in tasks:
-            task_id, assigner_id, assignee_id, channel_id, task_desc = task
+
+        # For each user, add a field with their avatar and tasks
+        for assignee_id, task_list in user_tasks.items():
+            user = interaction.guild.get_member(assignee_id)
+            if user:
+                name = f"{user.display_name}"
+                icon_url = user.display_avatar.url
+            else:
+                name = f"User {assignee_id}"
+                icon_url = None
+
+            # List all tasks for this user with task IDs
+            value = ""
+            for task_id, assigner_id, channel_id, task_desc in task_list:
+                value += f"**#{task_id}**: {task_desc} _(by <@{assigner_id}> in <#{channel_id}>)_\n"
+            if not value:
+                value = "No tasks."
+
+            # Discord embed fields can't have images, but we can use the user's avatar as the author if only one user
             embed.add_field(
-                name=f"Task #{task_id} for <@{assignee_id}>",
-                value=f"**Assigned by:** <@{assigner_id}>\n**Task:** {task_desc}\n**Channel:** <#{channel_id}>",
-                inline=False
+                name=f"{name}",
+                value=value,
+                inline=True
             )
+
+        # If only one user, set their avatar as the embed author
+        if len(user_tasks) == 1:
+            assignee_id = next(iter(user_tasks))
+            user = interaction.guild.get_member(assignee_id)
+            if user:
+                embed.set_author(name=user.display_name, icon_url=user.display_avatar.url)
+        else:
+            embed.set_footer(text="Task IDs shown for easy reference.")
+
         await interaction.followup.send(embed=embed)
     except Exception as e:
         logger.error(f"Error in tasks command: {e}")
