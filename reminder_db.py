@@ -1,5 +1,5 @@
 import aiosqlite
-from datetime import datetime
+from datetime import datetime, timezone
 
 DB_PATH = "reminders.db"
 
@@ -36,3 +36,4 @@ async def delete_reminder(reminder_id):
     async with aiosqlite.connect(DB_PATH) as db:
         await db.execute("DELETE FROM reminders WHERE id = ?", (reminder_id,))
         await db.commit()
+

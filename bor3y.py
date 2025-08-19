@@ -5,7 +5,7 @@ import asyncio
 from discord.ext import commands
 from ai_client import *
 from discord import app_commands
-from datetime import datetime
+from datetime import datetime, timezone
 from reminder_db import init_db, add_reminder, get_due_reminders, delete_reminder
 from task_db import init_task_db, add_task, delete_task, get_all_tasks
 from zoneinfo import ZoneInfo
@@ -42,7 +42,7 @@ class Bor3yBot(commands.Bot):
     async def reminder_loop(self):
         await self.wait_until_ready()
         while not self.is_closed():
-            now = datetime.utcnow().strftime("%Y-%m-%d %H:%M")
+            now = datetime.now(timezone.utc).strftime("%Y-%m-%d %H:%M")
             due = await get_due_reminders(now)
             for reminder in due:
                 _id, user_id, channel_id, message, when_utc = reminder
@@ -218,39 +218,38 @@ async def schedule_command(interaction: discord.Interaction, message: str, time:
         logger.error(f"Error in schedule command: {e}")
         await interaction.followup.send("Sorry, I couldn't schedule your message.")
 
-@bot.tree.command(name="scheduled", description="Show all your scheduled messages (Cairo Time)")
+@bot.tree.command(name="scheduled", description="Show all scheduled messages (Cairo Time, all users/channels)")
 async def scheduled_command(interaction: discord.Interaction):
     try:
         await interaction.response.defer(thinking=True)
         async with aiosqlite.connect("reminders.db") as db:
             cursor = await db.execute(
-                "SELECT message, when_utc FROM reminders WHERE user_id = ? AND channel_id = ?",
-                (interaction.user.id, interaction.channel_id)
+                "SELECT user_id, channel_id, message, when_utc FROM reminders ORDER BY when_utc"
             )
             rows = await cursor.fetchall()
         if not rows:
-            await interaction.followup.send("You have no scheduled messages in this channel.")
+            await interaction.followup.send("There are no scheduled messages.")
             return
 
         cairo = ZoneInfo("Africa/Cairo")
         lines = []
-        for msg, when_utc in rows:
+        for user_id, channel_id, msg, when_utc in rows:
             when_utc_dt = datetime.strptime(when_utc, "%Y-%m-%d %H:%M").replace(tzinfo=ZoneInfo("UTC"))
             when_cairo = when_utc_dt.astimezone(cairo).strftime("%Y-%m-%d %H:%M")
-            lines.append(f"**{when_cairo} Cairo:** {msg}")
+            lines.append(f"**{when_cairo} Cairo** | <@{user_id}> in <#{channel_id}>: {msg}")
 
         output = "\n".join(lines)
         if len(output) > 2000:
             with open("scheduled.txt", "w", encoding="utf-8") as f:
                 f.write(output)
             file = discord.File("scheduled.txt")
-            await interaction.followup.send("Your scheduled messages:", file=file)
+            await interaction.followup.send("All scheduled messages:", file=file)
         else:
-            await interaction.followup.send(f"Your scheduled messages:\n{output}")
+            await interaction.followup.send(f"All scheduled messages:\n{output}")
 
     except Exception as e:
         logger.error(f"Error in scheduled command: {e}")
-        await interaction.followup.send("Sorry, I couldn't retrieve your scheduled messages.")
+        await interaction.followup.send("Sorry, I couldn't retrieve the scheduled messages.")
 
 @bot.tree.command(name="assign", description="Assign a task to a user")
 @app_commands.describe(
