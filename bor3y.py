@@ -7,6 +7,7 @@ from ai_client import *
 from discord import app_commands
 from datetime import datetime
 from reminder_db import init_db, add_reminder, get_due_reminders, delete_reminder
+from task_db import init_task_db, add_task, delete_task, get_all_tasks
 from zoneinfo import ZoneInfo
 logger = logging.getLogger(__name__)
 gemini_llm = get_gemini_llm()
@@ -34,6 +35,7 @@ class Bor3yBot(commands.Bot):
         await self.change_presence(activity=activity)
     async def setup_hook(self):
             await init_db()
+            await init_task_db()
             await self.tree.sync()  # Sync slash commands on startup
             self.bg_task = asyncio.create_task(self.reminder_loop())
 
@@ -220,10 +222,9 @@ async def schedule_command(interaction: discord.Interaction, message: str, time:
 async def scheduled_command(interaction: discord.Interaction):
     try:
         await interaction.response.defer(thinking=True)
-        # Fetch all reminders for this user in this channel
         async with aiosqlite.connect("reminders.db") as db:
             cursor = await db.execute(
-                "SELECT message, when_utc FROM reminders WHERE user_id = ? AND channel_id = ? ORDER BY when_utc",
+                "SELECT message, when_utc FROM reminders ORDER BY when_utc",
                 (interaction.user.id, interaction.channel_id)
             )
             rows = await cursor.fetchall()
@@ -238,10 +239,8 @@ async def scheduled_command(interaction: discord.Interaction):
             when_cairo = when_utc_dt.astimezone(cairo).strftime("%Y-%m-%d %H:%M")
             lines.append(f"**{when_cairo} Cairo:** {msg}")
 
-        # Discord message limit: 2000 chars
         output = "\n".join(lines)
         if len(output) > 2000:
-            # Send as file if too long
             with open("scheduled.txt", "w", encoding="utf-8") as f:
                 f.write(output)
             file = discord.File("scheduled.txt")
@@ -252,3 +251,59 @@ async def scheduled_command(interaction: discord.Interaction):
     except Exception as e:
         logger.error(f"Error in scheduled command: {e}")
         await interaction.followup.send("Sorry, I couldn't retrieve your scheduled messages.")
+
+@bot.tree.command(name="assign", description="Assign a task to a user")
+@app_commands.describe(
+    user="The user to assign the task to",
+    task="The task description"
+)
+async def assign_command(interaction: discord.Interaction, user: discord.Member, task: str):
+    try:
+        await add_task(
+            assigner_id=interaction.user.id,
+            assignee_id=user.id,
+            channel_id=interaction.channel_id,
+            task=task
+        )
+        await interaction.response.send_message(
+            f"✅ Task assigned to {user.mention}: {task}", ephemeral=False
+        )
+    except Exception as e:
+        logger.error(f"Error in assign command: {e}")
+        await interaction.response.send_message("Sorry, I couldn't assign the task.")
+
+@bot.tree.command(name="delete_task", description="Delete a task by its ID")
+@app_commands.describe(
+    task_id="The ID of the task to delete"
+)
+async def delete_task_command(interaction: discord.Interaction, task_id: int):
+    try:
+        await delete_task(task_id)
+        await interaction.response.send_message(f"🗑️ Task {task_id} deleted.", ephemeral=False)
+    except Exception as e:
+        logger.error(f"Error in delete_task command: {e}")
+        await interaction.response.send_message("Sorry, I couldn't delete the task.")
+
+@bot.tree.command(name="tasks", description="View all assigned tasks")
+async def tasks_command(interaction: discord.Interaction):
+    try:
+        await interaction.response.defer(thinking=True)
+        tasks = await get_all_tasks()
+        if not tasks:
+            await interaction.followup.send("No tasks assigned yet.")
+            return
+        embed = discord.Embed(
+            title="📋 Assigned Tasks",
+            color=0x3498db
+        )
+        for task in tasks:
+            task_id, assigner_id, assignee_id, channel_id, task_desc = task
+            embed.add_field(
+                name=f"Task #{task_id} for <@{assignee_id}>",
+                value=f"**Assigned by:** <@{assigner_id}>\n**Task:** {task_desc}\n**Channel:** <#{channel_id}>",
+                inline=False
+            )
+        await interaction.followup.send(embed=embed)
+    except Exception as e:
+        logger.error(f"Error in tasks command: {e}")
+        await interaction.followup.send("Sorry, I couldn't retrieve the tasks.")
