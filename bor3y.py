@@ -283,7 +283,6 @@ async def delete_task_command(interaction: discord.Interaction, task_id: int):
     except Exception as e:
         logger.error(f"Error in delete_task command: {e}")
         await interaction.response.send_message("Sorry, I couldn't delete the task.")
-
 @bot.tree.command(name="tasks", description="View all assigned tasks")
 async def tasks_command(interaction: discord.Interaction):
     try:
@@ -293,52 +292,43 @@ async def tasks_command(interaction: discord.Interaction):
             await interaction.followup.send("No tasks assigned yet.")
             return
 
-        # Group tasks by assignee_id
         from collections import defaultdict
         user_tasks = defaultdict(list)
-        for task in tasks:
-            task_id, assigner_id, assignee_id, channel_id, task_desc = task
+        for task_id, assigner_id, assignee_id, channel_id, task_desc in tasks:
             user_tasks[assignee_id].append((task_id, assigner_id, channel_id, task_desc))
 
-        embed = discord.Embed(
-            title="📋 Assigned Tasks",
-            color=0x3498db
-        )
-
-        # For each user, add a field with their avatar and tasks
+        embeds = []
         for assignee_id, task_list in user_tasks.items():
             user = interaction.guild.get_member(assignee_id)
             if user:
-                name = f"{user.display_name}"
+                name = user.display_name
                 icon_url = user.display_avatar.url
             else:
-                name = f"User {assignee_id}"
+                name = f"User <@{assignee_id}>"
                 icon_url = None
 
-            # List all tasks for this user with task IDs
+            # Build tasks text
             value = ""
             for task_id, assigner_id, channel_id, task_desc in task_list:
                 value += f"**#{task_id}**: {task_desc} _(by <@{assigner_id}> in <#{channel_id}>)_\n"
-            if not value:
-                value = "No tasks."
 
-            # Discord embed fields can't have images, but we can use the user's avatar as the author if only one user
-            embed.add_field(
-                name=f"{name}",
-                value=value,
-                inline=True
+            embed = discord.Embed(
+                title="📋 Tasks",
+                description=value or "No tasks.",
+                color=0x3498db
             )
 
-        # If only one user, set their avatar as the embed author
-        if len(user_tasks) == 1:
-            assignee_id = next(iter(user_tasks))
-            user = interaction.guild.get_member(assignee_id)
-            if user:
-                embed.set_author(name=user.display_name, icon_url=user.display_avatar.url)
-        else:
-            embed.set_footer(text="Task IDs shown for easy reference.")
+            if icon_url:
+                embed.set_author(name=name, icon_url=icon_url)
+            else:
+                embed.set_author(name=name)
 
-        await interaction.followup.send(embed=embed)
+            embed.set_footer(text="Task IDs shown for easy reference.")
+            embeds.append(embed)
+
+        # Send them all at once
+        await interaction.followup.send(embeds=embeds)
+
     except Exception as e:
         logger.error(f"Error in tasks command: {e}")
         await interaction.followup.send("Sorry, I couldn't retrieve the tasks.")
