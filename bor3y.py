@@ -221,7 +221,7 @@ async def schedule_command(interaction: discord.Interaction, message: str, time:
 @bot.tree.command(name="scheduled", description="Show all scheduled messages (Cairo Time, all users/channels)")
 async def scheduled_command(interaction: discord.Interaction):
     try:
-        await interaction.response.defer(thinking=True)
+        await interaction.response.defer(thinking=True)  # Defer immediately!
         async with aiosqlite.connect("reminders.db") as db:
             cursor = await db.execute(
                 "SELECT user_id, channel_id, message, when_utc FROM reminders ORDER BY when_utc"
@@ -249,7 +249,11 @@ async def scheduled_command(interaction: discord.Interaction):
 
     except Exception as e:
         logger.error(f"Error in scheduled command: {e}")
-        await interaction.followup.send("Sorry, I couldn't retrieve the scheduled messages.")
+        # Only send a followup if you successfully deferred!
+        try:
+            await interaction.followup.send("Sorry, I couldn't retrieve the scheduled messages.")
+        except Exception:
+            pass  # If the interaction is already expired, just log the error
 
 @bot.tree.command(name="assign", description="Assign a task to a user")
 @app_commands.describe(

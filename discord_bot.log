@@ -196,3 +196,17 @@ discord.ext.commands.errors.CommandNotFound: Command "search" is not found
 2025-08-19 16:33:57,898 - bor3y - ERROR - Error in assign command: 404 Not Found (error code: 10062): Unknown interaction
 2025-08-19 16:34:00,044 - bor3y - ERROR - Error in tasks command: 404 Not Found (error code: 10062): Unknown interaction
 2025-08-19 16:37:51,185 - __main__ - INFO - Bot stopped by user
+2025-08-19 16:54:16,482 - discord.client - INFO - logging in using static token
+2025-08-19 16:54:18,833 - discord.gateway - INFO - Shard ID None has connected to Gateway (Session ID: 3b544e353a399ba22da23aff0e28eef7).
+2025-08-19 16:54:20,841 - bor3y - INFO - Bor3y#5114 has connected to Discord!
+2025-08-19 16:54:20,841 - bor3y - INFO - Bot is in 1 guilds
+2025-08-19 16:54:22,322 - bor3y - ERROR - Error in scheduled command: 404 Not Found (error code: 10062): Unknown interaction
+2025-08-19 16:57:33,777 - __main__ - INFO - Bot stopped by user
+2025-08-19 16:57:38,936 - discord.client - INFO - logging in using static token
+2025-08-19 16:57:41,997 - discord.gateway - INFO - Shard ID None has connected to Gateway (Session ID: 254951345fbbafbc55fb8cf125333d0d).
+2025-08-19 16:57:44,010 - bor3y - INFO - Bor3y#5114 has connected to Discord!
+2025-08-19 16:57:44,010 - bor3y - INFO - Bot is in 1 guilds
+2025-08-19 16:57:48,141 - bor3y - ERROR - Error in scheduled command: 404 Not Found (error code: 10062): Unknown interaction
+2025-08-19 16:58:07,035 - bor3y - ERROR - Error in schedule command: 400 Bad Request (error code: 40060): Interaction has already been acknowledged.
+2025-08-19 16:58:10,483 - bor3y - ERROR - Error in scheduled command: 404 Not Found (error code: 10062): Unknown interaction
+2025-08-19 16:58:35,406 - __main__ - INFO - Bot stopped by user
