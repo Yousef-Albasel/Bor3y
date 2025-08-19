@@ -224,7 +224,7 @@ async def scheduled_command(interaction: discord.Interaction):
         await interaction.response.defer(thinking=True)
         async with aiosqlite.connect("reminders.db") as db:
             cursor = await db.execute(
-                "SELECT message, when_utc FROM reminders ORDER BY when_utc",
+                "SELECT message, when_utc FROM reminders WHERE user_id = ? AND channel_id = ?",
                 (interaction.user.id, interaction.channel_id)
             )
             rows = await cursor.fetchall()
@@ -307,13 +307,17 @@ async def tasks_command(interaction: discord.Interaction):
                 name = f"User <@{assignee_id}>"
                 icon_url = None
 
-            # Build tasks text
+            # Build tasks text, truncate if needed
             value = ""
             for task_id, assigner_id, channel_id, task_desc in task_list:
-                value += f"**#{task_id}**: {task_desc} _(by <@{assigner_id}> in <#{channel_id}>)_\n"
+                line = f"**#{task_id}**: {task_desc} _(by <@{assigner_id}> in <#{channel_id}>)_\n"
+                if len(value) + len(line) > 1024:
+                    value += "... (truncated)\n"
+                    break
+                value += line
 
             embed = discord.Embed(
-                title="📋 Tasks",
+                title=f"📋 Tasks for {name}",
                 description=value or "No tasks.",
                 color=0x3498db
             )
@@ -326,8 +330,9 @@ async def tasks_command(interaction: discord.Interaction):
             embed.set_footer(text="Task IDs shown for easy reference.")
             embeds.append(embed)
 
-        # Send them all at once
-        await interaction.followup.send(embeds=embeds)
+        # Discord allows max 10 embeds per message, so send in batches
+        for i in range(0, len(embeds), 10):
+            await interaction.followup.send(embeds=embeds[i:i+10])
 
     except Exception as e:
         logger.error(f"Error in tasks command: {e}")
