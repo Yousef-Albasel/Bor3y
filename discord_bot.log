@@ -210,3 +210,38 @@ discord.ext.commands.errors.CommandNotFound: Command "search" is not found
 2025-08-19 16:58:07,035 - bor3y - ERROR - Error in schedule command: 400 Bad Request (error code: 40060): Interaction has already been acknowledged.
 2025-08-19 16:58:10,483 - bor3y - ERROR - Error in scheduled command: 404 Not Found (error code: 10062): Unknown interaction
 2025-08-19 16:58:35,406 - __main__ - INFO - Bot stopped by user
+2025-08-20 19:50:52,134 - discord.client - INFO - logging in using static token
+2025-08-20 19:50:55,717 - discord.gateway - INFO - Shard ID None has connected to Gateway (Session ID: 3901f57c3afca864f07dc2912a08651e).
+2025-08-20 19:50:57,741 - bor3y - INFO - Next task reminder scheduled for 2025-08-21 12:00:00+03:00 (in 58142 seconds)
+2025-08-20 19:50:57,741 - bor3y - INFO - Bor3y#5114 has connected to Discord!
+2025-08-20 19:50:57,741 - bor3y - INFO - Bot is in 1 guilds
+2025-08-20 19:51:16,066 - discord.app_commands.tree - ERROR - Ignoring exception in command 'summarize'
+Traceback (most recent call last):
+  File "C:\Users\ASUS\AppData\Local\Programs\Python\Python313\Lib\site-packages\discord\app_commands\commands.py", line 858, in _do_call
+    return await self._callback(interaction, **params)  # type: ignore
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "f:\Bor3y\bor3y.py", line 610, in summarize_command
+    await interaction.response.defer(thinking=True)  # show "thinking" status
+    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\ASUS\AppData\Local\Programs\Python\Python313\Lib\site-packages\discord\interactions.py", line 844, in defer
+    response = await adapter.create_interaction_response(
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    ...<6 lines>...
+    )
+    ^
+  File "C:\Users\ASUS\AppData\Local\Programs\Python\Python313\Lib\site-packages\discord\webhook\async_.py", line 226, in request
+    raise HTTPException(response, data)
+discord.errors.HTTPException: 400 Bad Request (error code: 40060): Interaction has already been acknowledged.
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "C:\Users\ASUS\AppData\Local\Programs\Python\Python313\Lib\site-packages\discord\app_commands\tree.py", line 1310, in _call
+    await command._invoke_with_namespace(interaction, namespace)
+  File "C:\Users\ASUS\AppData\Local\Programs\Python\Python313\Lib\site-packages\discord\app_commands\commands.py", line 883, in _invoke_with_namespace
+    return await self._do_call(interaction, transformed_values)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\ASUS\AppData\Local\Programs\Python\Python313\Lib\site-packages\discord\app_commands\commands.py", line 876, in _do_call
+    raise CommandInvokeError(self, e) from e
+discord.app_commands.errors.CommandInvokeError: Command 'summarize' raised an exception: HTTPException: 400 Bad Request (error code: 40060): Interaction has already been acknowledged.
+2025-08-20 19:52:07,991 - __main__ - INFO - Bot stopped by user

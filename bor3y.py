@@ -2,14 +2,17 @@ import logging
 import aiosqlite
 import discord
 import asyncio
+import os
 from discord.ext import commands
 from ai_client import *
 from discord import app_commands
-from datetime import datetime, timezone
+from datetime import datetime, timezone, time
 from reminder_db import init_db, add_reminder, get_due_reminders, delete_reminder
 from task_db import init_task_db, add_task, delete_task, get_all_tasks
 from summarizer import run_summarizer
 from zoneinfo import ZoneInfo
+from collections import defaultdict
+
 logger = logging.getLogger(__name__)
 gemini_llm = get_gemini_llm()
 
@@ -25,6 +28,7 @@ class Bor3yBot(commands.Bot):
             help_command=None
         )
         self.bg_task = None
+        self.task_reminder_task = None
 
     async def on_ready(self):
         logger.info(f'{self.user} has connected to Discord!')
@@ -34,11 +38,13 @@ class Bor3yBot(commands.Bot):
             name="السيرفر | Server Guardian"
         )
         await self.change_presence(activity=activity)
+    
     async def setup_hook(self):
-            await init_db()
-            await init_task_db()
-            await self.tree.sync()  # Sync slash commands on startup
-            self.bg_task = asyncio.create_task(self.reminder_loop())
+        await init_db()
+        await init_task_db()
+        await self.tree.sync()  # Sync slash commands on startup
+        self.bg_task = asyncio.create_task(self.reminder_loop())
+        self.task_reminder_task = asyncio.create_task(self.daily_task_reminder_loop())
 
     async def reminder_loop(self):
         await self.wait_until_ready()
@@ -55,6 +61,134 @@ class Bor3yBot(commands.Bot):
                         logger.error(f"Failed to send reminder: {e}")
                 await delete_reminder(_id)
             await asyncio.sleep(60)
+
+    async def daily_task_reminder_loop(self):
+        """Send daily task reminders at 12 PM Cairo time"""
+        await self.wait_until_ready()
+        
+        while not self.is_closed():
+            now_cairo = datetime.now(ZoneInfo("Africa/Cairo"))
+            target_time = time(12, 0)  # 12:00 PM
+            
+            # Calculate next 12 PM Cairo time
+            if now_cairo.time() < target_time:
+                # Today at 12 PM
+                next_reminder = now_cairo.replace(
+                    hour=12, minute=0, second=0, microsecond=0
+                )
+            else:
+                # Tomorrow at 12 PM
+                from datetime import timedelta
+                next_reminder = (now_cairo + timedelta(days=1)).replace(
+                    hour=12, minute=0, second=0, microsecond=0
+                )
+            
+            # Calculate seconds to wait
+            wait_seconds = (next_reminder - now_cairo).total_seconds()
+            logger.info(f"Next task reminder scheduled for {next_reminder} (in {wait_seconds:.0f} seconds)")
+            
+            # Wait until the scheduled time
+            await asyncio.sleep(wait_seconds)
+            
+            # Send reminders
+            await self.send_task_reminders()
+            
+            # Wait a bit to avoid duplicate sends in the same minute
+            await asyncio.sleep(65)
+
+    async def send_task_reminders(self):
+        """Send task reminders to users with unfinished tasks"""
+        try:
+            tasks = await get_all_tasks()
+            if not tasks:
+                logger.info("No tasks found for daily reminders")
+                return
+
+            # Group tasks by user
+            user_tasks = defaultdict(list)
+            channels_used = set()
+            
+            for task_id, assigner_id, assignee_id, channel_id, task_desc in tasks:
+                user_tasks[assignee_id].append((task_id, assigner_id, channel_id, task_desc))
+                channels_used.add(channel_id)
+
+            reminder_count = 0
+            
+            # Send individual DMs to users with tasks
+            for assignee_id, task_list in user_tasks.items():
+                try:
+                    # Try to get user from any guild the bot is in
+                    user = None
+                    for guild in self.guilds:
+                        user = guild.get_member(assignee_id)
+                        if user:
+                            break
+                    
+                    if not user:
+                        continue
+
+                    # Create reminder message
+                    task_lines = []
+                    for task_id, assigner_id, channel_id, task_desc in task_list[:10]:  # Limit to 10 tasks
+                        assigner_name = "Unknown"
+                        try:
+                            assigner = await self.fetch_user(assigner_id)
+                            if assigner:
+                                assigner_name = assigner.display_name
+                        except:
+                            pass
+                        
+                        task_lines.append(f"• **#{task_id}**: {task_desc} _(assigned by {assigner_name})_")
+                    
+                    if len(task_list) > 10:
+                        task_lines.append(f"• ... and {len(task_list) - 10} more tasks")
+
+                    embed = discord.Embed(
+                        title="📋 Daily Task Reminder",
+                        description=f"You have **{len(task_list)}** unfinished task(s):",
+                        color=0xff9900
+                    )
+                    embed.add_field(
+                        name="Your Tasks:",
+                        value="\n".join(task_lines),
+                        inline=False
+                    )
+                    embed.add_field(
+                        name="💡 Tip:",
+                        value="Tasks can be deleted using `/delete_task <task_id>` when completed.",
+                        inline=False
+                    )
+                    embed.set_footer(text="Daily reminder sent at 12:00 PM Cairo time")
+
+                    # Try to send DM
+                    try:
+                        await user.send(embed=embed)
+                        reminder_count += 1
+                        logger.info(f"Sent task reminder to {user.display_name} ({len(task_list)} tasks)")
+                    except discord.Forbidden:
+                        # User has DMs disabled, try to send in a channel where they have tasks
+                        for _, _, channel_id, _ in task_list:
+                            channel = self.get_channel(channel_id)
+                            if channel:
+                                try:
+                                    await channel.send(f"{user.mention}", embed=embed)
+                                    reminder_count += 1
+                                    logger.info(f"Sent task reminder to {user.display_name} in channel (DM failed)")
+                                    break
+                                except:
+                                    continue
+                    
+                    # Small delay to avoid rate limits
+                    await asyncio.sleep(1)
+
+                except Exception as e:
+                    logger.error(f"Error sending reminder to user {assignee_id}: {e}")
+                    continue
+
+            logger.info(f"Daily task reminders sent: {reminder_count} users notified")
+            
+        except Exception as e:
+            logger.error(f"Error in send_task_reminders: {e}")
 
     async def on_message(self, message):
         if message.author == self.user:
@@ -138,7 +272,7 @@ async def help_command(ctx):
     )
     embed.add_field(
         name="المميزات / Features:",
-        value="• إجابات ذكية باستخدام Google Gemini / AI-powered responses\n• محادثة طبيعية / Natural conversation\n• إجابات مفيدة ومعلوماتية / Helpful and informative answers\n• يدعم العربية والإنجليزية / Supports Arabic and English",
+        value="• إجابات ذكية باستخدام Google Gemini / AI-powered responses\n• محادثة طبيعية / Natural conversation\n• إجابات مفيدة ومعلوماتية / Helpful and informative answers\n• يدعم العربية والإنجليزية / Supports Arabic and English\n• تذكيرات يومية للمهام / Daily task reminders at 12 PM Cairo time",
         inline=False
     )
     await ctx.send(embed=embed)
@@ -153,7 +287,106 @@ async def status_command(ctx):
     embed.add_field(name="Discord", value="✅ Connected", inline=True)
     embed.add_field(name="Gemini AI", value=gemini_status, inline=True)
     embed.add_field(name="Latency", value=f"{round(bot.latency * 1000)}ms", inline=True)
+    embed.add_field(name="Task Reminders", value="✅ Active (12 PM Cairo)", inline=True)
     await ctx.send(embed=embed)
+
+@bot.tree.command(name="remind_tasks", description="Manually send task reminders to all users with unfinished tasks")
+async def remind_tasks_command(interaction: discord.Interaction):
+    """Manual command to send task reminders immediately"""
+    try:
+        await interaction.response.defer(thinking=True)
+        
+        # Get all tasks
+        tasks = await get_all_tasks()
+        if not tasks:
+            await interaction.followup.send("📋 No tasks found to remind about.")
+            return
+
+        # Group tasks by user
+        user_tasks = defaultdict(list)
+        for task_id, assigner_id, assignee_id, channel_id, task_desc in tasks:
+            user_tasks[assignee_id].append((task_id, assigner_id, channel_id, task_desc))
+
+        reminder_count = 0
+        failed_count = 0
+
+        # Send reminders
+        for assignee_id, task_list in user_tasks.items():
+            try:
+                # Try to get user
+                user = interaction.guild.get_member(assignee_id)
+                if not user:
+                    try:
+                        user = await interaction.guild.fetch_member(assignee_id)
+                    except:
+                        failed_count += 1
+                        continue
+
+                # Create reminder message
+                task_lines = []
+                for task_id, assigner_id, channel_id, task_desc in task_list[:10]:
+                    assigner_name = "Unknown"
+                    try:
+                        assigner = interaction.guild.get_member(assigner_id)
+                        if assigner:
+                            assigner_name = assigner.display_name
+                    except:
+                        pass
+                    
+                    task_lines.append(f"• **#{task_id}**: {task_desc} _(by {assigner_name})_")
+
+                if len(task_list) > 10:
+                    task_lines.append(f"• ... and {len(task_list) - 10} more tasks")
+
+                embed = discord.Embed(
+                    title="📋 Task Reminder (Manual)",
+                    description=f"You have **{len(task_list)}** unfinished task(s):",
+                    color=0xff6600
+                )
+                embed.add_field(
+                    name="Your Tasks:",
+                    value="\n".join(task_lines),
+                    inline=False
+                )
+                embed.add_field(
+                    name="💡 Tip:",
+                    value="Use `/delete_task <task_id>` to remove completed tasks.",
+                    inline=False
+                )
+                embed.set_footer(text=f"Manual reminder sent by {interaction.user.display_name}")
+
+                # Try to send DM first, then channel message as fallback
+                try:
+                    await user.send(embed=embed)
+                    reminder_count += 1
+                except discord.Forbidden:
+                    # Try to send in the current channel
+                    try:
+                        await interaction.channel.send(f"{user.mention}", embed=embed)
+                        reminder_count += 1
+                    except:
+                        failed_count += 1
+
+                await asyncio.sleep(0.5)  # Rate limit protection
+
+            except Exception as e:
+                logger.error(f"Error sending manual reminder to user {assignee_id}: {e}")
+                failed_count += 1
+
+        # Send summary
+        summary_embed = discord.Embed(
+            title="📨 Task Reminders Sent",
+            color=0x00ff00 if failed_count == 0 else 0xff9900
+        )
+        summary_embed.add_field(name="✅ Successfully sent", value=str(reminder_count), inline=True)
+        summary_embed.add_field(name="❌ Failed", value=str(failed_count), inline=True)
+        summary_embed.add_field(name="👥 Total users with tasks", value=str(len(user_tasks)), inline=True)
+        
+        await interaction.followup.send(embed=summary_embed)
+
+    except Exception as e:
+        logger.error(f"Error in remind_tasks command: {e}")
+        await interaction.followup.send("❌ Sorry, I couldn't send the task reminders. Please try again.")
 
 @bot.tree.command(name="search", description="Search the web and answer using Gemini")
 @app_commands.describe(query="Your search query")
@@ -352,13 +585,11 @@ async def tasks_command(interaction: discord.Interaction):
 async def assign_all_command(interaction: discord.Interaction, task: str):
     try:
         await interaction.response.defer(thinking=True)
-        # Get all members (excluding bots)
         members = [m for m in interaction.guild.members if not m.bot]
         if not members:
             await interaction.followup.send("No users found to assign the task.")
             return
 
-        # Assign the task to each member
         for member in members:
             await add_task(
                 assigner_id=interaction.user.id,
@@ -372,6 +603,7 @@ async def assign_all_command(interaction: discord.Interaction, task: str):
     except Exception as e:
         logger.error(f"Error in assign_all command: {e}")
         await interaction.followup.send("Sorry, I couldn't assign the task to all users.")
+
 @bot.tree.command(name="summarize", description="Upload a PDF and get a summary")
 @app_commands.describe(file="Attach your PDF")
 async def summarize_command(interaction: discord.Interaction, file: discord.Attachment):
@@ -393,7 +625,7 @@ async def summarize_command(interaction: discord.Interaction, file: discord.Atta
         if len(summary) > 2000:  # Discord message limit
             with open("summary.txt", "w", encoding="utf-8") as f:
                 f.write(summary)
-            await interaction.followup.send("📄 Summary is too long, here’s a file:", file=discord.File("summary.txt"))
+            await interaction.followup.send("📄 Summary is too long, here's a file:", file=discord.File("summary.txt"))
         else:
             await interaction.followup.send(f"📑 **Summary:**\n{summary}")
     except Exception as e:
