@@ -6,8 +6,7 @@ import os
 from dotenv import load_dotenv
 
 load_dotenv()
-
-async def run_summarizer(file_path: str) -> str:
+def run_summarizer(file_path: str) -> str:
     loader = PyPDFLoader(file_path)
     docs = loader.load_and_split()
     llm = ChatGroq(

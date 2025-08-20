@@ -372,11 +372,11 @@ async def assign_all_command(interaction: discord.Interaction, task: str):
     except Exception as e:
         logger.error(f"Error in assign_all command: {e}")
         await interaction.followup.send("Sorry, I couldn't assign the task to all users.")
-
 @bot.tree.command(name="summarize", description="Upload a PDF and get a summary")
 @app_commands.describe(file="Attach your PDF")
 async def summarize_command(interaction: discord.Interaction, file: discord.Attachment):
-    await interaction.response.defer(thinking=True)
+    await interaction.response.defer(thinking=True)  # show "thinking" status
+
     if not file.filename.endswith(".pdf"):
         await interaction.followup.send("❌ Please upload a PDF file.")
         return
@@ -386,9 +386,10 @@ async def summarize_command(interaction: discord.Interaction, file: discord.Atta
     await file.save(file_path)
 
     try:
-        summary = await asyncio.get_event_loop().run_in_executor(
-            None, lambda: run_summarizer(file_path)
-        )
+        # Run blocking summarizer in thread pool
+        loop = asyncio.get_event_loop()
+        summary = await loop.run_in_executor(None, lambda: run_summarizer(file_path))
+
         if len(summary) > 2000:  # Discord message limit
             with open("summary.txt", "w", encoding="utf-8") as f:
                 f.write(summary)
