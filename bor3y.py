@@ -8,6 +8,7 @@ from discord import app_commands
 from datetime import datetime, timezone
 from reminder_db import init_db, add_reminder, get_due_reminders, delete_reminder
 from task_db import init_task_db, add_task, delete_task, get_all_tasks
+from summarizer import run_summarizer
 from zoneinfo import ZoneInfo
 logger = logging.getLogger(__name__)
 gemini_llm = get_gemini_llm()
@@ -371,3 +372,31 @@ async def assign_all_command(interaction: discord.Interaction, task: str):
     except Exception as e:
         logger.error(f"Error in assign_all command: {e}")
         await interaction.followup.send("Sorry, I couldn't assign the task to all users.")
+
+@bot.tree.command(name="summarize", description="Upload a PDF and get a summary")
+@app_commands.describe(file="Attach your PDF")
+async def summarize_command(interaction: discord.Interaction, file: discord.Attachment):
+    await interaction.response.defer(thinking=True)
+    if not file.filename.endswith(".pdf"):
+        await interaction.followup.send("❌ Please upload a PDF file.")
+        return
+
+    # Save the file locally
+    file_path = f"./{file.filename}"
+    await file.save(file_path)
+
+    try:
+        summary = await asyncio.get_event_loop().run_in_executor(
+            None, lambda: run_summarizer(file_path)
+        )
+        if len(summary) > 2000:  # Discord message limit
+            with open("summary.txt", "w", encoding="utf-8") as f:
+                f.write(summary)
+            await interaction.followup.send("📄 Summary is too long, here’s a file:", file=discord.File("summary.txt"))
+        else:
+            await interaction.followup.send(f"📑 **Summary:**\n{summary}")
+    except Exception as e:
+        await interaction.followup.send(f"⚠️ Error summarizing: {e}")
+    finally:
+        if os.path.exists(file_path):
+            os.remove(file_path)
